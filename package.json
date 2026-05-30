@@ -1,0 +1,16 @@
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..c2337b1762b2822f353ee528267dc92a60a0d605
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,10 @@
++{
++  "name": "tissue-price-calculator",
++  "version": "1.0.0",
++  "private": true,
++  "type": "module",
++  "scripts": {
++    "test": "node --test",
++    "check:js": "node --check calculator.js"
++  }
++}
