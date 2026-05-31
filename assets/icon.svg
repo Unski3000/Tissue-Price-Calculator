@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Kerio Pricing icon">
+  <rect width="512" height="512" rx="96" fill="#1b5e20"/>
+  <circle cx="256" cy="256" r="164" fill="#e8f5e9"/>
+  <path d="M170 345V167h45v73l72-73h58l-82 82 88 96h-61l-75-82v82h-45Z" fill="#1b5e20"/>
+</svg>

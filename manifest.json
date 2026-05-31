@@ -1,0 +1,18 @@
+{
+  "name": "Kerio Care+ Pricing Engine",
+  "short_name": "Kerio Pricing",
+  "description": "A mobile-friendly 40-roll bale pricing calculator for Kerio Care+ tissue products.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f4f1",
+  "theme_color": "#1b5e20",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
