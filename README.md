@@ -1,6 +1,6 @@
 # Tissue-Price-Calculator
 
-Kerio Care+ Pricing Engine is a mobile-friendly static web app for estimating 40-roll bale prices for tissue and paper products.
+Kerio Care+ Pricing Engine is a responsive static web app for estimating 40-roll bale prices for tissue and paper products. The layout is mobile-first and expands into a two-column desktop workspace on larger screens.
 
 ## What it calculates
 
@@ -15,40 +15,6 @@ The calculator combines material, transport, inner-core, packaging, bale-bag, an
 ## How to run locally
 
 Serve the folder with a small static server so the browser loads the module script and companion assets from the correct paths:
-# Tissue Price Calculator
-
-Kerio Care+ Pricing Engine is a mobile-friendly web calculator for estimating the selling price of a 40-roll bale of tissue or paper products.
-
-The app is designed for quick pricing checks when product inputs change, such as mother-roll cost, transport cost, roll weight, inner-core cost, packaging format, bale-bag cost, and desired markup.
-
-## Who this is for
-
-This repository is intended for Kerio Care+ team members who need to understand, verify, or update the bale pricing calculator without needing background explanation from the original author.
-
-Use this README to understand:
-
-- what the calculator does,
-- which inputs affect the price,
-- how the price is calculated,
-- where the current app logic lives,
-- which assumptions should be reviewed before relying on the output.
-
-## What the app calculates
-
-For a selected product and packaging format, the app estimates:
-
-- final market price for one 40-roll bale,
-- all-in production cost before markup,
-- gross profit per bale,
-- material cost per roll,
-- inner-core cost per roll when the selected product uses a core,
-- base material/core cost for the 40 rolls before packaging and markup.
-
-## How to run the app
-
-This is a static browser app. No build step is required for the current version.
-
-Open `index.html` directly in a browser, or serve the repository folder with a simple local static server:
 
 ```sh
 python3 -m http.server 8000
