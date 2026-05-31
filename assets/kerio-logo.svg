@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" role="img" aria-labelledby="title desc">
+  <title id="title">Kerio Care+ LTD logo</title>
+  <desc id="desc">Kerio Care+ LTD wordmark with green and red brand colors.</desc>
+  <rect width="900" height="260" rx="28" fill="#ffffff"/>
+  <g transform="translate(38 38)">
+    <path d="M120 172c-44 0-80-36-80-80 0-12 3-24 8-34" fill="none" stroke="#0f6b38" stroke-width="18" stroke-linecap="round"/>
+    <path d="M154 12c46 14 79 57 79 108 0 62-50 112-112 112-29 0-56-11-76-29" fill="none" stroke="#ee4454" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="92" cy="32" r="23" fill="#0f6b38"/>
+    <path d="M94 78c38 13 65 49 65 91" fill="none" stroke="#0f6b38" stroke-width="19" stroke-linecap="round"/>
+    <path d="M36 136c-18 0-31-6-36-20 17 2 31 9 36 20Zm14 33c-17 5-31 2-40-10 16-3 31 1 40 10Zm-5-69c-15-9-22-21-18-36 14 8 22 20 18 36Z" fill="#0f6b38"/>
+  </g>
+  <text x="240" y="128" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="800" fill="#0f6b38">Kerio Care</text>
+  <text x="706" y="128" font-family="Arial, Helvetica, sans-serif" font-size="82" font-weight="800" fill="#ee4454">+</text>
+  <text x="240" y="176" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#ee4454">Pure Quality, Pure Satisfaction</text>
+  <text x="738" y="176" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" fill="#0f6b38">LTD</text>
+</svg>
