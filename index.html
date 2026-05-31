@@ -17,6 +17,9 @@
 <script type="module" src="calculator.js"></script>
 </head>
 <body>
+<noscript>
+  <div class="noscript-warning">This calculator needs JavaScript enabled to keep prices updated when inputs change.</div>
+</noscript>
 <div class="app">
   <header class="hdr">
     <div class="logo-bg"><img src="assets/kerio-logo.svg" alt="Kerio Care+ logo"></div>
@@ -62,7 +65,7 @@
         </div>
         <div class="field">
           <label for="matRoll">Material / roll</label>
-          <input type="text" id="matRoll" readonly tabindex="-1" aria-label="Material cost per roll, auto calculated" title="Auto-calculated: total mother roll cost per kg × roll weight in kg">
+          <input type="text" id="matRoll" readonly tabindex="-1" aria-label="Material cost per roll, auto calculated" title="Auto-calculated: total mother roll cost per kg × roll weight in kg" value="20.52">
           <div class="unit">KES (auto)</div>
         </div>
       </div>
@@ -118,18 +121,18 @@
       <div class="output-grid" id="baleOutput" aria-live="polite">
         <article class="output-card full">
           <div class="output-l">Final market price / 40-roll bale</div>
-          <div class="output-v" data-output="marketPrice">KES 0</div>
-          <div class="output-s" data-output="marketSummary"></div>
+          <div class="output-v" data-output="marketPrice">KES 1,290</div>
+          <div class="output-s" data-output="marketSummary">Single Rolls · includes material, core, packaging, bale bag, and 40% markup.</div>
         </article>
         <article class="output-card light">
           <div class="output-l">All-in cost before markup</div>
-          <div class="output-v" data-output="productionCost">KES 0</div>
-          <div class="output-s" data-output="productionSummary"></div>
+          <div class="output-v" data-output="productionCost">KES 921</div>
+          <div class="output-s" data-output="productionSummary">Base 863 + packaging 58</div>
         </article>
         <article class="output-card light">
           <div class="output-l">Gross profit / bale</div>
-          <div class="output-v" data-output="grossProfit">KES 0</div>
-          <div class="output-s" data-output="profitSummary"></div>
+          <div class="output-v" data-output="grossProfit">KES 369</div>
+          <div class="output-s" data-output="profitSummary">At 40% markup</div>
         </article>
       </div>
 
@@ -150,16 +153,16 @@
       </div>
       <div class="notes">
         <strong>Notes</strong>
-        <span data-output="packagingAssumption"></span>
+        <span data-output="packagingAssumption">Selected packaging cost includes pack/sleeve material and the fixed bale bag cost.</span>
         <span>10-Pack sleeve cost is 4 KES per sleeve only. Tissue/material cost is calculated separately.</span>
         <span>Mother roll price varies with transport. Update Tissue + Transport fields independently for accuracy.</span>
       </div>
     </section>
 
     <section class="stats" id="stats" aria-label="Summary statistics" aria-live="polite">
-      <div class="stat"><div class="stat-v" data-output="rollCost">0</div><div class="stat-l">KES / roll</div></div>
-      <div class="stat"><div class="stat-v" data-output="base40">0</div><div class="stat-l">Material + core</div></div>
-      <div class="stat"><div class="stat-v" data-output="markupPercent">0%</div><div class="stat-l">Markup</div></div>
+      <div class="stat"><div class="stat-v" data-output="rollCost">21.59</div><div class="stat-l">KES / roll</div></div>
+      <div class="stat"><div class="stat-v" data-output="base40">863</div><div class="stat-l">Material + core</div></div>
+      <div class="stat"><div class="stat-v" data-output="markupPercent">40%</div><div class="stat-l">Markup</div></div>
     </section>
 
     <footer class="foot">Kerio Careplus+ LTD · P.O. Box 180, Iten Town, Elgeyo Marakwet County, Kenya 30700</footer>

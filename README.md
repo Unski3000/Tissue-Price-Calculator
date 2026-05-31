@@ -1,3 +1,20 @@
+# Tissue-Price-Calculator
+
+Kerio Care+ Pricing Engine is a mobile-friendly static web app for estimating 40-roll bale prices for tissue and paper products.
+
+## What it calculates
+
+The calculator combines material, transport, inner-core, packaging, bale-bag, and markup inputs to estimate:
+
+- final market price per 40-roll bale,
+- all-in production cost before markup,
+- gross profit per bale,
+- material/core cost per roll,
+- base material/core cost for a 40-roll bale.
+
+## How to run locally
+
+Serve the folder with a small static server so the browser loads the module script and companion assets from the correct paths:
 # Tissue Price Calculator
 
 Kerio Care+ Pricing Engine is a mobile-friendly web calculator for estimating the selling price of a 40-roll bale of tissue or paper products.
@@ -37,158 +54,82 @@ Open `index.html` directly in a browser, or serve the repository folder with a s
 python3 -m http.server 8000
 ```
 
-Then open:
-
-```text
-http://localhost:8000/
-```
-
-## Current implementation status
-
-The currently working app is implemented inside `index.html`.
-
-Important details for new contributors:
-
-- `index.html` contains the active HTML, inline CSS, and inline JavaScript used by the browser.
-- The active pricing function is the inline `calc()` function near the bottom of `index.html`.
-- `calculator.js`, `calculator.test.js`, `styles.css`, `manifest.json`, and `package.json` currently appear to contain patch/diff text from an attempted refactor rather than clean runnable files.
-- Because `package.json` is not valid JSON in the current repository state, `npm test` does not run successfully yet.
-
-Before moving logic out of `index.html`, clean the patch-style files into valid source files and confirm the app still produces the same pricing outputs.
-
-## Product types
-
-The app supports four product types:
-
-| Product type | Default roll weight | Uses inner core? |
-| --- | ---: | :---: |
-| Regular Roll | 83 g | Yes |
-| Jumbo Roll | 150 g | Yes |
-| Tissue Paper | 55 g | No |
-| Kitchen Towel | 110 g | Yes |
-
-When a user changes the product type, the app updates the default roll weight and hides the inner-core section for products that do not use a core.
-
-## Pricing inputs
-
-The calculator uses these user-editable inputs:
-
-| Input | Meaning |
-| --- | --- |
-| Tissue price | Factory price of the mother roll in KES per kg. |
-| Transport price | Delivery or transport cost in KES per kg. |
-| Roll weight | Weight of one finished roll in grams. |
-| Core price | Cost of one 1450 mm inner-core rod. |
-| Cuts per rod | Number of finished roll cores cut from one rod. |
-| Markup % | Profit markup applied to the full production cost. |
-| Packaging format | The packaging option used for the 40-roll bale. |
-
-## Packaging formats
-
-The current packaging assumptions are:
-
-| Packaging format | Quantity per 40-roll bale | Packaging unit cost |
-| --- | ---: | ---: |
-| Single Rolls | 40 rolls | KES 1.16 per roll |
-| Twin / 2-Pack | 20 packs | KES 2.00 per pack |
-| Quad / 4-Pack | 10 packs | KES 5.00 per pack |
-| Jumbo Pack | 40 ÷ 6 = 6.67 packs | KES 5.00 per pack |
-| 10-Pack Naked | 4 packs | KES 4.00 per sleeve |
-
-A fixed bale-bag cost of KES 11.60 is added to the selected packaging cost.
+Then visit <http://localhost:8000/>.
 
 ## Pricing formula
 
-The calculator uses this formula:
+The calculation logic lives in `calculator.js` and follows this formula:
 
-1. Total mother-roll cost per kg = tissue price per kg + transport price per kg.
-2. Roll weight in kg = roll weight in grams ÷ 1000.
-3. Material cost per roll = total mother-roll cost per kg × roll weight in kg.
-4. Core cost per roll = core price ÷ cuts per rod.
-5. If the selected product does not use an inner core, core cost per roll is 0.
-6. Roll cost = material cost per roll + core cost per roll.
-7. Base 40-roll bale cost = roll cost × 40.
-8. Packaging cost = selected packaging unit cost × selected packaging quantity + bale-bag cost.
-9. Production cost = base 40-roll bale cost + packaging cost.
-10. Market price = production cost × (1 + markup percentage ÷ 100).
-11. Gross profit = market price - production cost.
+1. Mother roll cost = tissue price per kg + transport price per kg.
+2. Material cost per roll = mother roll cost × roll weight in kg.
+3. Core cost per roll = core price ÷ cuts per rod for products with an inner core.
+4. Base bale cost = roll cost × 40 rolls.
+5. Packaging cost = selected packaging unit cost × selected packaging quantity + bale bag cost.
+6. Production cost = base bale cost + packaging cost.
+7. Market price = production cost × (1 + markup percentage).
+8. Gross profit = market price - production cost.
 
-## Example default calculation
+## Business assumptions
 
-Using the default Regular Roll values currently shown in the app:
+The default assumptions are centralized in `calculator.js`:
 
-- tissue price: KES 209.43/kg,
-- transport price: KES 37.74/kg,
-- total mother-roll cost: KES 247.17/kg,
-- roll weight: 83 g,
-- core price: KES 15.00 per rod,
-- cuts per rod: 14,
-- markup: 40%,
-- packaging: Single Rolls,
-- bale bag: KES 11.60.
+- Every bale contains 40 rolls.
+- The bale bag cost is KES 11.60.
+- Regular Roll default weight is 83 g and includes an inner core.
+- Jumbo Roll default weight is 150 g and includes an inner core.
+- Tissue Paper default weight is 55 g and does not include an inner core.
+- Kitchen Towel default weight is 110 g and includes an inner core.
+- Jumbo Pack assumes 6 rolls per pack, which means 40 ÷ 6 = 6.67 packs per bale. Verify this with the supplier before relying on the result.
+- 10-Pack Naked packaging includes only sleeve cost; tissue/material cost is calculated separately.
 
-The app calculates:
+## Updating prices and assumptions
 
-- material cost per roll = 247.17 × 0.083 = about KES 20.52,
-- core cost per roll = 15 ÷ 14 = about KES 1.07,
-- roll cost = about KES 21.59,
-- base 40-roll bale cost = about KES 863.46,
-- packaging and bale-bag cost = about KES 58.00,
-- production cost before markup = about KES 921.46,
-- final market price at 40% markup = about KES 1,290.05,
-- gross profit per bale = about KES 368.58.
+Update product defaults, packaging prices, packaging quantities, and bale bag cost in the `PRICING_CONFIG` object inside `calculator.js`.
 
-## Business assumptions to verify
+The main values to review when supplier prices change are:
 
-Always verify current supplier prices before using the calculator output for sales or production decisions.
+- `baleBagCost`,
+- `products[*].defaultWeightGrams`,
+- `products[*].hasCore`,
+- `packaging[*].packagingCost`,
+- `packaging[*].quantityPerBale`,
+- the default form values in `index.html`.
 
-Pay special attention to:
+Always verify supplier costs before using the app output for sales or production decisions.
 
-- tissue price per kg,
-- transport price per kg,
-- roll weight per product,
-- core price per rod,
-- cuts per rod,
-- packaging costs,
-- bale-bag cost,
-- markup percentage,
-- Jumbo Pack pack size.
+## Project structure
 
-The Jumbo Pack calculation assumes 6 rolls per pack, which means a 40-roll bale requires 6.67 packs. Confirm this with the supplier before relying on Jumbo Pack pricing.
+```text
+index.html          # semantic app markup
+styles.css          # app layout and visual design
+calculator.js       # pricing configuration, formula, validation, and UI wiring
+manifest.json       # installable web app metadata
+assets/             # text-based SVG app and logo assets
+tests/              # Node test coverage for pricing formulas
+```
 
-The 10-Pack Naked option includes only the sleeve cost in the packaging calculation. Tissue/material cost is still calculated separately through the roll-cost formula.
+## Deployment checklist
 
-## Where to update values
+When deploying or manually uploading the app, copy the whole project structure, not only `index.html`. The page depends on `styles.css`, `calculator.js`, `manifest.json`, and the SVG files under `assets/` being present at the documented paths.
 
-For the current working app, update values in `index.html`:
+Before publishing, run:
 
-- product defaults are in the `TYPES` object,
-- packaging costs and quantities are in the `PACKS` array,
-- bale-bag cost is in the `BALE_BAG` constant,
-- default input values are in the form fields above the script.
+```sh
+npm run check:deploy
+```
 
-If the app is later refactored to use `calculator.js`, move these assumptions into a single clean configuration object and update this README to match the new source of truth.
+This catches common manual-upload mistakes such as saving a Git diff as a real file, leaving `styles.css` or `calculator.js` out of the deployment, or placing `icon.svg` / `calculator.test.js` at the repo root instead of under `assets/` and `tests/`.
 
-## Development notes
+## Checks
 
-Recommended cleanup tasks for future contributors:
+Run the formula tests with:
 
-1. Convert `calculator.js` from patch text into valid JavaScript.
-2. Convert `calculator.test.js` into a real Node test file or move it into a `tests/` directory.
-3. Convert `package.json` into valid JSON so `npm test` can run.
-4. Move inline CSS from `index.html` into `styles.css` only after confirming the visual layout remains unchanged.
-5. Move inline calculator logic from `index.html` into `calculator.js` only after confirming the output matches the current app.
-6. Fix `manifest.json` so the app can be installed as a proper progressive web app if needed.
+```sh
+npm test
+```
 
-## Quick file guide
+Run a JavaScript syntax check with:
 
-| File | Purpose |
-| --- | --- |
-| `index.html` | Current working browser app, including markup, styling, and calculation logic. |
-| `README.md` | Project explanation and onboarding guide. |
-| `calculator.js` | Intended extracted pricing module, but currently stored as patch/diff text. |
-| `calculator.test.js` | Intended pricing tests, but currently stored as patch/diff text. |
-| `styles.css` | Intended extracted stylesheet, but currently stored as patch/diff text. |
-| `manifest.json` | Intended web app manifest, but currently stored as patch/diff text. |
-| `package.json` | Intended Node project metadata, but currently stored as patch/diff text and not valid JSON. |
-| `icon.svg` | App icon asset. |
+```sh
+npm run check:js
+```

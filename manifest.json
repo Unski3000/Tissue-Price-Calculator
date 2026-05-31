@@ -1,29 +1,18 @@
-diff --git a/manifest.json b/manifest.json
-new file mode 100644
-index 0000000000000000000000000000000000000000..5621d5f621fd7374103562cb147f3567e5e01d66
---- /dev/null
-+++ b/manifest.json
-@@ -0,0 +1,23 @@
-+{
-+  "name": "Kerio Care+ Pricing Engine",
-+  "short_name": "Kerio Pricing",
-+  "description": "A mobile-friendly 40-roll bale pricing calculator for Kerio Care+ tissue products.",
-+  "start_url": "./index.html",
-+  "scope": "./",
-+  "display": "standalone",
-+  "background_color": "#f0f4f1",
-+  "theme_color": "#1b5e20",
-+  "icons": [
-+    {
-+      "src": "assets/favicon-32x32.png",
-+      "sizes": "32x32",
-+      "type": "image/png"
-+    },
-+    {
-+      "src": "assets/icon.svg",
-+      "sizes": "any",
-+      "type": "image/svg+xml",
-+      "purpose": "any maskable"
-+    }
-+  ]
-+}
+{
+  "name": "Kerio Care+ Pricing Engine",
+  "short_name": "Kerio Pricing",
+  "description": "A mobile-friendly 40-roll bale pricing calculator for Kerio Care+ tissue products.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f4f1",
+  "theme_color": "#1b5e20",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
