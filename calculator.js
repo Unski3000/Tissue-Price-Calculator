@@ -2,16 +2,15 @@ export const PRICING_CONFIG = {
   baleRollCount: 40,
   baleBagCost: 11.6,
   products: {
-    regular: { label: 'Regular Roll', defaultWeightGrams: 83, hasCore: true },
-    jumbo: { label: 'Jumbo Roll', defaultWeightGrams: 150, hasCore: true },
-    tissue: { label: 'Tissue Paper', defaultWeightGrams: 55, hasCore: false },
-    towel: { label: 'Kitchen Towel', defaultWeightGrams: 110, hasCore: true },
+    regular: { label: 'Regular Roll', defaultMarkupPercent: 40, defaultWeightGrams: 83, hasCore: true },
+    jumbo: { label: 'Jumbo Roll', baleRollCount: 12, defaultMarkupPercent: 20, defaultWeightGrams: 150, hasCore: true },
+    tissue: { label: 'Tissue Paper', defaultMarkupPercent: 40, defaultWeightGrams: 55, hasCore: false },
+    towel: { label: 'Kitchen Towel', defaultMarkupPercent: 40, defaultWeightGrams: 110, hasCore: true },
   },
   packaging: [
     { name: 'Single Rolls', tag: '×40', naked: false, packagingCost: 1.16, quantityPerBale: 40, rollsPerPack: 1, unit: 'roll' },
     { name: 'Twin / 2-Pack', tag: '×20', naked: false, packagingCost: 2, quantityPerBale: 20, rollsPerPack: 2, unit: 'pack' },
     { name: 'Quad / 4-Pack', tag: '×10', naked: false, packagingCost: 5, quantityPerBale: 10, rollsPerPack: 4, unit: 'pack' },
-    { name: 'Jumbo Pack', tag: '×6⅔', naked: false, packagingCost: 5, quantityPerBale: 40 / 6, rollsPerPack: 6, unit: 'pack', assumption: 'Jumbo Pack assumes 6 rolls per pack (40 ÷ 6 = 6.67 packs/bale). Confirm with supplier.' },
     { name: '10-Pack (Naked)', tag: '×4 Naked', naked: true, packagingCost: 4, quantityPerBale: 4, rollsPerPack: 10, unit: 'pack' },
   ],
 };
@@ -23,9 +22,12 @@ const FIELD_LABELS = {
   coreP: 'Core price',
   cutsP: 'Cuts per rod',
   mkup: 'Markup',
+  packCost: 'Packaging unit cost',
+  bagCost: 'Bale bag cost',
 };
 
 let currentProductType = 'regular';
+const productEdits = new Map();
 
 export function formatNumber(n, decimalPlaces = 0) {
   const value = Number.isFinite(n) ? n : 0;
@@ -63,28 +65,33 @@ export function normalizePricingInput(input = {}, config = PRICING_CONFIG) {
     rollWeightGrams: nonNegativeNumber(input.rollWeightGrams, product.defaultWeightGrams),
     corePrice: nonNegativeNumber(input.corePrice),
     cutsPerRod: atLeastOne(input.cutsPerRod),
-    markupPercent: nonNegativeNumber(input.markupPercent),
-    packagingIndex: clampIndex(input.packagingIndex, config.packaging.length),
+    markupPercent: nonNegativeNumber(input.markupPercent, product.defaultMarkupPercent),
+    packagingIndex: input.productType === 'jumbo' ? 0 : clampIndex(input.packagingIndex, config.packaging.length),
+    packagingUnitCost: nonNegativeNumber(input.packagingUnitCost, config.packaging[input.productType === 'jumbo' ? 0 : clampIndex(input.packagingIndex, config.packaging.length)].packagingCost),
+    baleBagCost: nonNegativeNumber(input.baleBagCost, config.baleBagCost),
   };
 }
 
 export function calculatePrice(input = {}, config = PRICING_CONFIG) {
   const normalizedInput = normalizePricingInput(input, config);
   const product = config.products[normalizedInput.productType];
-  const packaging = config.packaging[normalizedInput.packagingIndex];
+  const baleRollCount = product.baleRollCount ?? config.baleRollCount;
+  const selectedPackaging = config.packaging[normalizedInput.packagingIndex];
+  const packaging = { ...selectedPackaging, quantityPerBale: baleRollCount / selectedPackaging.rollsPerPack };
   const totalKgCost = normalizedInput.tissuePrice + normalizedInput.transportPrice;
   const rollWeightKg = normalizedInput.rollWeightGrams / 1000;
   const materialCostPerRoll = totalKgCost * rollWeightKg;
   const coreCostPerRoll = product.hasCore ? normalizedInput.corePrice / normalizedInput.cutsPerRod : 0;
   const rollCost = materialCostPerRoll + coreCostPerRoll;
-  const baseBaleCost = rollCost * config.baleRollCount;
-  const packagingCost = packaging.packagingCost * packaging.quantityPerBale + config.baleBagCost;
+  const baseBaleCost = rollCost * baleRollCount;
+  const packagingCost = normalizedInput.packagingUnitCost * packaging.quantityPerBale + normalizedInput.baleBagCost;
   const productionCost = baseBaleCost + packagingCost;
   const markupFactor = 1 + normalizedInput.markupPercent / 100;
   const marketPrice = productionCost * markupFactor;
   const grossProfit = marketPrice - productionCost;
 
   return {
+    baleRollCount,
     input: normalizedInput,
     product,
     packaging,
@@ -116,6 +123,8 @@ function readForm() {
     corePrice: getNumber('coreP', 15),
     cutsPerRod: getNumber('cutsP', 14),
     markupPercent: getNumber('mkup', 0),
+    packagingUnitCost: getNumber('packCost'),
+    baleBagCost: getNumber('bagCost'),
     packagingIndex: Number.parseInt(document.getElementById('packSelect')?.value || '0', 10),
   };
 }
@@ -167,7 +176,10 @@ function setText(selector, value) {
 function renderResult(result, input) {
   const inputValues = result.input ?? input;
   const coreSummary = result.product.hasCore ? 'core' : 'no core';
-  const packagingAssumption = result.packaging.assumption ?? 'Selected packaging cost includes pack/sleeve material and the fixed bale bag cost.';
+  setText('#output-title', `${result.baleRollCount}-Roll Bale Output`);
+  setText('[data-output="marketLabel"]', `Final market price / ${result.baleRollCount}-roll bale`);
+  setText('#packHelp', result.input.productType === 'jumbo' ? '12 individually wrapped rolls per bale. Wrapping cost is per roll; verify it for jumbo.' : `${result.packaging.quantityPerBale} packs per ${result.baleRollCount}-roll bale.`);
+  const packagingAssumption = result.packaging.assumption ?? 'Selected packaging cost includes pack/sleeve material and the editable bale bag cost.';
 
   setText('[data-output="totalKgCost"]', `${formatNumber(result.totalKgCost, 2)} KES/kg`);
   document.getElementById('matRoll').value = formatNumber(result.materialCostPerRoll, 2);
@@ -187,6 +199,7 @@ function renderResult(result, input) {
 }
 
 function updateProductType(productType) {
+  if (document.getElementById('packCost').value !== '') productEdits.set(currentProductType, readForm());
   currentProductType = PRICING_CONFIG.products[productType] ? productType : 'regular';
   const product = PRICING_CONFIG.products[currentProductType];
 
@@ -198,8 +211,17 @@ function updateProductType(productType) {
 
   const rollWeight = document.getElementById('rollWt');
   if (rollWeight) {
-    rollWeight.value = product.defaultWeightGrams;
+    rollWeight.value = productEdits.get(currentProductType)?.rollWeightGrams ?? product.defaultWeightGrams;
   }
+
+  const saved = productEdits.get(currentProductType);
+  document.getElementById('mkup').value = saved?.markupPercent ?? product.defaultMarkupPercent;
+  const select = document.getElementById('packSelect');
+  select.value = saved?.packagingIndex ?? 0;
+  select.disabled = currentProductType === 'jumbo';
+  if (select.disabled) select.value = 0;
+  document.getElementById('packCost').value = saved?.packagingUnitCost ?? PRICING_CONFIG.packaging[select.value].packagingCost;
+  document.getElementById('bagCost').value = saved?.baleBagCost ?? PRICING_CONFIG.baleBagCost;
 
   const coreBox = document.getElementById('coreBox');
   if (coreBox) {
@@ -221,6 +243,10 @@ function init() {
       updateProductType(button.dataset.productType);
       refresh();
     });
+  });
+
+  document.getElementById('packSelect').addEventListener('change', (event) => {
+    document.getElementById('packCost').value = PRICING_CONFIG.packaging[event.target.value].packagingCost;
   });
 
   document.querySelectorAll('[data-pricing-input]').forEach((control) => {
