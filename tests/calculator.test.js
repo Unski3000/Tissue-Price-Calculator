@@ -82,11 +82,57 @@ test('normalizes missing and invalid values to safe defaults', () => {
     cutsPerRod: 1,
     markupPercent: 0,
     packagingIndex: 0,
+    packagingUnitCost: 1.16,
+    baleBagCost: 11.6,
   });
 });
 
 test('clamps packaging index to the available packaging range', () => {
   assert.equal(calculatePrice({ ...defaultInput, packagingIndex: 999 }).packaging.name, '10-Pack (Naked)');
   assert.equal(calculatePrice({ ...defaultInput, packagingIndex: -1 }).packaging.name, 'Single Rolls');
-  assert.equal(calculatePrice({ ...defaultInput, packagingIndex: '3' }).packaging.name, 'Jumbo Pack');
+  assert.equal(calculatePrice({ ...defaultInput, packagingIndex: '3' }).packaging.name, '10-Pack (Naked)');
+});
+
+
+test('jumbo uses 12 individual wraps and defaults to 20% markup', () => {
+  const result = calculatePrice({ tissuePrice: 100, transportPrice: 20, productType: 'jumbo', corePrice: 10, cutsPerRod: 10, packagingIndex: 2 });
+  assert.equal(result.baleRollCount, 12);
+  assert.equal(result.materialCostPerRoll, 18);
+  assert.equal(result.coreCostPerRoll, 1);
+  assert.equal(result.baseBaleCost, 228);
+  assert.equal(result.packaging.rollsPerPack, 1);
+  assert.equal(result.packaging.quantityPerBale, 12);
+  assertClose(result.packagingCost, 25.52);
+  assertClose(result.productionCost, 253.52);
+  assert.equal(result.input.markupPercent, 20);
+  assertClose(result.marketPrice, 304.22);
+  assertClose(result.grossProfit, 50.70);
+});
+
+test('jumbo honors editable costs, weight and markup including zero', () => {
+  for (const markupPercent of [0, 35]) {
+    const result = calculatePrice({ productType: 'jumbo', tissuePrice: 100, rollWeightGrams: 200, corePrice: 0, packagingUnitCost: 3, baleBagCost: 8, markupPercent });
+    assert.equal(result.productionCost, 284);
+    assertClose(result.marketPrice, Number((284 * (1 + markupPercent / 100)).toFixed(2)));
+    assertClose(result.grossProfit, Number((284 * markupPercent / 100).toFixed(2)));
+  }
+});
+
+test('regular formats retain 40 rolls and default 40% markup', () => {
+  for (let packagingIndex = 0; packagingIndex < PRICING_CONFIG.packaging.length; packagingIndex++) {
+    const result = calculatePrice({ productType: 'regular', packagingIndex });
+    assert.equal(result.baleRollCount, 40);
+    assert.equal(result.input.markupPercent, 40);
+    assert.equal(result.packaging.quantityPerBale * result.packaging.rollsPerPack, 40);
+  }
+});
+
+test('product defaults remain configurable', () => {
+  const config = structuredClone(PRICING_CONFIG);
+  config.products.jumbo.defaultMarkupPercent = 25;
+  config.baleBagCost = 7;
+  config.packaging[0].packagingCost = 2;
+  const result = calculatePrice({ productType: 'jumbo' }, config);
+  assert.equal(result.input.markupPercent, 25);
+  assert.equal(result.packagingCost, 31);
 });
